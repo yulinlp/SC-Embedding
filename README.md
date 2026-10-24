@@ -145,7 +145,7 @@ Each example needs at least one positive and one negative passage. Queries and r
 **One command runs both stages and saves the final adapter:**
 
 ```bash
-MODEL_SIZE=4B DEVICE=npu NPROC=8 bash scripts/train.sh \
+DEVICE=npu NPROC=8 bash scripts/train.sh \
   --base-model models/Qwen3-4B-Instruct-2507 \
   --data /path/to/EvoTrain-180K \
   --output runs/sc-4b
@@ -153,13 +153,7 @@ MODEL_SIZE=4B DEVICE=npu NPROC=8 bash scripts/train.sh \
 
 The run retains model weights between Local pretraining and selective contextual learning, and saves only `runs/sc-4b/final/`. No intermediate Local checkpoint is needed. Load this final directory with the same inference code above.
 
-| Setting | 0.8B | 2B | 4B |
-| :--- | ---: | ---: | ---: |
-| Local learning rate | 5e-5 | 5e-5 | 5e-5 |
-| Contextual learning rate | 5e-6 | 2e-5 | 1e-5 |
-| LoRA rank / alpha | 64 / 128 | 64 / 128 | 64 / 128 |
-
-Set `MODEL_SIZE=0.8B` or `MODEL_SIZE=2B` and supply the corresponding backbone. Use `DEVICE=cuda` for NVIDIA GPUs. `NPROC` must divide the effective batch size of 16. Hyperparameters are in [configs/](configs/); `--local-steps` and `--contextual-steps` override stopping points while retaining the configured learning-rate schedules. The paper uses one server with eight Ascend 910B NPUs.
+Use the corresponding backbone to train another model size, or set `DEVICE=cuda` for NVIDIA GPUs. `NPROC` must divide the effective batch size of 16. Training starts with built-in defaults; use `--local-lr`, `--contextual-lr`, `--local-steps`, and `--contextual-steps` to adjust a run. See the paper for experimental settings.
 
 ## Acknowledgments and License
 

@@ -159,23 +159,35 @@ def train_stages(model, rows, config, output, rank=0, world=1, contextual_ids=No
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--config", required=True)
     parser.add_argument("--base-model", required=True, help="Local Qwen model directory")
     parser.add_argument("--data", required=True, help="EvoTrain chunk directory or JSONL")
     parser.add_argument("--output", required=True)
     parser.add_argument("--device", choices=("npu", "cuda", "cpu"), default="npu")
-    parser.add_argument("--local-steps", type=int)
-    parser.add_argument("--contextual-steps", type=int)
+    parser.add_argument("--local-steps", type=int, default=5300)
+    parser.add_argument("--contextual-steps", type=int, default=600)
+    parser.add_argument("--local-lr", type=float, default=5e-5)
+    parser.add_argument("--contextual-lr", type=float, default=1e-5)
     parser.add_argument("--contextual-ids", help="Optional JSON list of training row IDs")
     parser.add_argument("--dry-run", action="store_true", help="Validate configuration without loading weights")
     args = parser.parse_args()
-    config = json.loads(Path(args.config).read_text())
-    for name in ("local", "contextual"):
-        override = getattr(args, name+"_steps")
-        if override is not None:
-            config[name]["steps"] = override
-        if not 0 < config[name]["steps"] <= config[name]["scheduler_steps"]:
+    config = dict(
+        lora_rank=64, lora_alpha=128, effective_batch_size=16,
+        batch_tokens=8192, temperature=.05,
+        history=dict(top_k=4, candidate_k=32, rrf_constant=60, budget=2048),
+        distillation=dict(kd_temperature=.05, ramp_steps=200, reliability_gap=.01,
+                          improvement_gap=.01, gradient_ratio=.2, alpha_cap=1.),
+        local=dict(steps=args.local_steps, scheduler_steps=7276,
+                   learning_rate=args.local_lr, weight_decay=0., scheduler="cosine",
+                   warmup_ratio=.05, seed=3407),
+        contextual=dict(steps=args.contextual_steps, scheduler_steps=6954,
+                        learning_rate=args.contextual_lr, weight_decay=.01,
+                        scheduler="linear", warmup_steps=200, seed=3407),
+    )
+    for stage in (config["local"], config["contextual"]):
+        if not 0 < stage["steps"] <= stage["scheduler_steps"]:
             raise ValueError("Stage steps must be positive and within the scheduler horizon")
+        if not math.isfinite(stage["learning_rate"]) or stage["learning_rate"] <= 0:
+            raise ValueError("Learning rates must be finite and positive")
     if not Path(args.base_model).is_dir() or not Path(args.data).exists():
         raise FileNotFoundError("Provide existing local model and data paths")
     if args.dry_run:

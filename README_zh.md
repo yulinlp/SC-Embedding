@@ -145,7 +145,7 @@ Ascend 环境需导入 `torch` 和 `torch_npu`，调用 `torch.npu.set_device(0)
 **一条命令完成两个阶段，并保存最终适配器：**
 
 ```bash
-MODEL_SIZE=4B DEVICE=npu NPROC=8 bash scripts/train.sh \
+DEVICE=npu NPROC=8 bash scripts/train.sh \
   --base-model models/Qwen3-4B-Instruct-2507 \
   --data /path/to/EvoTrain-180K \
   --output runs/sc-4b
@@ -153,13 +153,7 @@ MODEL_SIZE=4B DEVICE=npu NPROC=8 bash scripts/train.sh \
 
 Local 预训练和选择性上下文学习之间直接保留模型权重，只在 `runs/sc-4b/final/` 保存最终结果，无需中间 Local checkpoint。训练完成后，使用上面的推理代码加载该目录即可。
 
-| 设置 | 0.8B | 2B | 4B |
-| :--- | ---: | ---: | ---: |
-| Local 学习率 | 5e-5 | 5e-5 | 5e-5 |
-| Contextual 学习率 | 5e-6 | 2e-5 | 1e-5 |
-| LoRA rank / alpha | 64 / 128 | 64 / 128 | 64 / 128 |
-
-其他尺寸设置 `MODEL_SIZE=0.8B` 或 `MODEL_SIZE=2B`，并提供对应基座。NVIDIA GPU 使用 `DEVICE=cuda`。`NPROC` 必须能整除有效 batch size 16。超参数见 [configs/](configs/)；`--local-steps` 和 `--contextual-steps` 可修改停止步数，同时保留配置中的学习率调度。论文训练使用一台配备八张 Ascend 910B NPU 的服务器。
+训练其他尺寸时提供对应基座；NVIDIA GPU 使用 `DEVICE=cuda`。`NPROC` 必须能整除有效 batch size 16。训练入口提供默认值，可通过 `--local-lr`、`--contextual-lr`、`--local-steps` 和 `--contextual-steps` 调整学习率与步数。实验设置详见论文。
 
 ## 致谢与许可证
 
