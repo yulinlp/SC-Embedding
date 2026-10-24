@@ -1,4 +1,4 @@
-"""Local pretraining -> selective contextual learning -> one final adapter."""
+"""Two-stage training for SC-Embedding."""
 import argparse
 from datetime import timedelta
 import hashlib
@@ -58,7 +58,7 @@ def row_order(rows, seed, effective_batch=16):
 def synchronize_gradients(parameters, world):
     if world == 1:
         return
-    # Bounded communication buffers, rather than a second full adapter copy.
+    # Reduce gradients in bounded communication buffers.
     bucket, count = [], 0
     def reduce(items):
         flat = torch.cat([p.grad.flatten() if p.grad is not None else torch.zeros_like(p).flatten() for p in items])
@@ -147,7 +147,6 @@ def train_stages(model, rows, config, output, rank=0, world=1, contextual_ids=No
                 log.flush()
                 if rank == 0:
                     print(json.dumps({k:v for k,v in event.items() if k != "rows"}), flush=True)
-        # No save/reload and no frozen teacher at the transition.
         optimizer.zero_grad(set_to_none=True)
         del optimizer
     if world > 1:

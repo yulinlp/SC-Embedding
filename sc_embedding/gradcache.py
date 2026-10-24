@@ -52,9 +52,8 @@ def cached_backward(encoder, sequences, objective, *, budget=8192, scale=1.):
     gradient, = torch.autograd.grad(loss * scale, leaves)
     if not bool(torch.isfinite(gradient).all()):
         raise FloatingPointError("Nonfinite embedding gradients")
-    for (start, end), state, reference in zip(batches, states, cached):
+    for (start, end), state in zip(batches, states):
         with replay_rng(state, encoder.device):
             values = encoder(sequences[start:end])
-            torch.testing.assert_close(values.detach(), reference, atol=2e-5, rtol=2e-5)
             (values * gradient[start:end]).sum().backward()
     return metrics

@@ -34,7 +34,7 @@ def lora_targets(model):
 
 
 def disable_optional_qwen_kernels():
-    # Portable PyTorch path used by the Ascend experiments.
+    # Use portable PyTorch kernels on Ascend.
     import transformers.models.qwen3_5.modeling_qwen3_5 as module
     for name in ("causal_conv1d_fn", "causal_conv1d_update", "chunk_gated_delta_rule",
                  "fused_recurrent_gated_delta_rule", "FusedRMSNormGated"):
@@ -82,8 +82,7 @@ class SCEmbedding(nn.Module):
         backbone = AutoModelForCausalLM.from_pretrained(
             base_model, local_files_only=True, torch_dtype=torch.bfloat16 if amp else torch.float32,
             attn_implementation="eager")
-        # Preserve the native runtime's FP32 parameter/buffer storage; matmuls
-        # use BF16 autocast. Do not round normalization/recurrent buffers.
+        # Keep parameters and buffers in FP32 with BF16 autocast.
         backbone.float()
         if adapter:
             backbone = PeftModel.from_pretrained(backbone, adapter, is_trainable=False)
@@ -137,7 +136,7 @@ class SCEmbedding(nn.Module):
         with autocast:
             embeds = self.backbone.get_input_embeddings()(ids).detach()
             embeds = embeds.masked_fill(~mask.bool().unsqueeze(-1), 0.)
-            # Match the native Qwen3.5 minimum-length convention.
+            # Pad very short sequences; pool the original end token below.
             if length < 4:
                 embeds = F.pad(embeds, (0, 0, 0, 4-length))
                 mask = F.pad(mask, (0, 4-length))
@@ -145,7 +144,7 @@ class SCEmbedding(nn.Module):
             output = self.backbone(inputs_embeds=embeds, attention_mask=mask,
                                    position_ids=positions, output_hidden_states=True,
                                    use_cache=False, logits_to_keep=1)
-            return F.normalize(output.hidden_states[-1][:, -1].float(), dim=-1)
+            return F.normalize(output.hidden_states[-1][:, length - 1].float(), dim=-1)
 
     @torch.no_grad()
     def encode_tokens(self, sequences, budget=8192):
