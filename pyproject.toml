@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "sc-embedding"
 version = "0.1.0"
-description = "Retrieval Augmented Selective Contextualization for Long-Context Retrieval"
+description = "Selective Contextualization for Long-Context Retrieval"
 requires-python = ">=3.10"
 dependencies = ["torch>=2.9", "transformers==5.8.1", "peft==0.14.0", "safetensors>=0.4.5", "numpy>=1.26"]
 

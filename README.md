@@ -1,7 +1,7 @@
 <div align="center">
 
 # SC-Embedding
-### Retrieval Augmented Selective Contextualization<br>for Long-Context Retrieval
+### Selective Contextualization for Long-Context Retrieval
 
 [![Models](https://img.shields.io/badge/🤗_Models-Hugging_Face-FFD21E)](#models)
 [![GitHub stars](https://img.shields.io/github/stars/yulinlp/SC-Embedding?style=social)](https://github.com/yulinlp/SC-Embedding)
@@ -30,7 +30,7 @@ SC-Embedding introduces two levels of selection:
 - **Selective retrieval:** retrieve relevant historical passages in their original form using semantic similarity and BM25, preserving their chronological order.
 - **Selective contextual learning:** compare retrieval rankings under full, dropped, and empty history views, and learn from reliable views that improve retrieval through self-distillation.
 
-Training begins with **Local pretraining**, then develops contextual representations through **selective contextual learning**. The same encoder supplies independent and contextual representations. Its normalized embeddings work with standard vector search; queries are encoded independently.
+Training combines **Local pretraining** and **selective contextual learning** in one encoder, producing normalized embeddings for standard vector search.
 
 <details>
 <summary><b>Training framework</b></summary>
@@ -68,7 +68,7 @@ Using **116K retrieval-labeled examples** from EvoTrain-180K, the same source da
 | EvoEmbedding-4B | 64.48 | 74.20 | 55.35 | **72.68** | 73.60 | 68.06 |
 | **SC-Embedding-4B** | **67.92** | **75.80** | **57.56** | 72.42 | **75.49** | **69.84** |
 
-Replacing MiniLM with SC-Embedding also improves LoCoMo generation accuracy by **6.75–8.72 points** across Mem0, A-MEM, LightMem, and MemoryOS. These are results reported in the paper.
+Replacing MiniLM with SC-Embedding also improves LoCoMo generation accuracy by **6.75–8.72 points** across Mem0, A-MEM, LightMem, and MemoryOS.
 
 <a id="models"></a>
 
@@ -80,7 +80,14 @@ Replacing MiniLM with SC-Embedding also improves LoCoMo generation accuracy by *
 | SC-Embedding-2B | [Qwen3.5-2B](https://huggingface.co/Qwen/Qwen3.5-2B) | [🤗 257 MiB](https://huggingface.co/linlp22/SC-Embedding-2B) |
 | SC-Embedding-4B | [Qwen3-4B-Instruct-2507](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507) | [🤗 504 MiB](https://huggingface.co/linlp22/SC-Embedding-4B) |
 
-Download the adapter together with its matching backbone. The released adapters were trained with a fixed initial teacher; this repository's training recipe uses online self-distillation. Model cards and [checkpoint metadata](checkpoints.json) record their provenance.
+Download the adapter together with its matching backbone.
+
+<details>
+<summary>Checkpoint provenance</summary>
+
+The released adapters were trained with a fixed initial teacher; this repository's training recipe uses online self-distillation. See the model cards and [checkpoint metadata](checkpoints.json).
+
+</details>
 
 ## Installation
 
@@ -92,7 +99,7 @@ cd SC-Embedding
 pip install -e .
 ```
 
-The development setup uses Python 3.11, PyTorch 2.9.0, Transformers 5.8.1, and PEFT 0.14.0. Ascend additionally uses torch-npu 2.9.0.post2 and CANN 9.0.0. CUDA entry points are included but have not been validated in a full training run.
+Development environment: Python 3.11, PyTorch 2.9.0, Transformers 5.8.1, and PEFT 0.14.0; Ascend also requires torch-npu 2.9.0.post2 and CANN 9.0.0. CUDA entry points are included but have not been validated in a full training run.
 
 <a id="inference"></a>
 
@@ -128,7 +135,7 @@ print(scores)
 
 On Ascend, import `torch` and `torch_npu`, call `torch.npu.set_device(0)`, and use `device="npu:0"`.
 
-Each passage list must belong to **one document or conversation in chronological order**. Only preceding passages are retrieved as history. For independent text embedding, use `model.encode_passages(passages, contextual=False)`. The default history budget is four passages and 2,048 tokens.
+Each passage list must belong to **one document or conversation in chronological order**. Only preceding passages are retrieved as history. For independent text embedding, use `model.encode_passages(passages, contextual=False)`.
 
 <a id="training"></a>
 
@@ -140,7 +147,7 @@ Use the original `data_chunk_*.json` files from [EvoTrain-180K](https://huggingf
 {"id":"example-1","passages":["Alice lives in Paris.","She works as a doctor.","Bob lives in London."],"query":"Where does Alice live?","positives":[0]}
 ```
 
-Each example needs at least one positive and one negative passage. Queries and relevance labels supervise training; history retrieval uses passage text only.
+Each example needs at least one positive and one negative passage.
 
 **One command runs both stages and saves the final adapter:**
 
@@ -151,9 +158,9 @@ DEVICE=npu NPROC=8 bash scripts/train.sh \
   --output runs/sc-4b
 ```
 
-The run retains model weights between Local pretraining and selective contextual learning, and saves only `runs/sc-4b/final/`. No intermediate Local checkpoint is needed. Load this final directory with the same inference code above.
+The final adapter is saved to `runs/sc-4b/final/` and can be loaded with the inference code above.
 
-Use the corresponding backbone to train another model size, or set `DEVICE=cuda` for NVIDIA GPUs. `NPROC` must divide the effective batch size of 16. Training starts with built-in defaults; use `--local-lr`, `--contextual-lr`, `--local-steps`, and `--contextual-steps` to adjust a run. See the paper for experimental settings.
+Use the corresponding backbone to train another model size, or set `DEVICE=cuda` for NVIDIA GPUs. `NPROC` must divide the effective batch size of 16. For optional arguments, run `python -m sc_embedding.train --help`.
 
 ## Acknowledgments and License
 

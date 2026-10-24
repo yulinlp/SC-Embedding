@@ -1,7 +1,7 @@
 <div align="center">
 
 # SC-Embedding
-### Retrieval Augmented Selective Contextualization<br>for Long-Context Retrieval
+### Selective Contextualization for Long-Context Retrieval
 
 [![Models](https://img.shields.io/badge/🤗_Models-Hugging_Face-FFD21E)](#models)
 [![GitHub stars](https://img.shields.io/github/stars/yulinlp/SC-Embedding?style=social)](https://github.com/yulinlp/SC-Embedding)
@@ -30,7 +30,7 @@ SC-Embedding 引入两个层面的选择：
 - **选择性检索：** 结合语义相似度与 BM25，检索相关历史段落的原文，并保留其时间顺序。
 - **选择性上下文学习：** 比较完整历史、部分历史丢弃和空历史下的检索排序，通过自蒸馏，从能够可靠改善检索的视图中学习。
 
-训练先进行 **Local 预训练**，再通过**选择性上下文学习**形成上下文化表示。同一个编码器提供独立表示和上下文化表示，问题独立编码，输出的归一化向量可直接用于常规向量检索。
+同一个编码器依次完成 **Local 预训练**和**选择性上下文学习**，输出可用于常规向量检索的归一化表示。
 
 <details>
 <summary><b>训练框架</b></summary>
@@ -68,7 +68,7 @@ SC-Embedding 引入两个层面的选择：
 | EvoEmbedding-4B | 64.48 | 74.20 | 55.35 | **72.68** | 73.60 | 68.06 |
 | **SC-Embedding-4B** | **67.92** | **75.80** | **57.56** | 72.42 | **75.49** | **69.84** |
 
-在 Mem0、A-MEM、LightMem 和 MemoryOS 中，将 MiniLM 替换为 SC-Embedding，还能使 LoCoMo 生成准确率提升 **6.75–8.72 个百分点**。以上为论文报告的结果。
+在 Mem0、A-MEM、LightMem 和 MemoryOS 中，将 MiniLM 替换为 SC-Embedding，还能使 LoCoMo 生成准确率提升 **6.75–8.72 个百分点**。
 
 <a id="models"></a>
 
@@ -80,7 +80,14 @@ SC-Embedding 引入两个层面的选择：
 | SC-Embedding-2B | [Qwen3.5-2B](https://huggingface.co/Qwen/Qwen3.5-2B) | [🤗 257 MiB](https://huggingface.co/linlp22/SC-Embedding-2B) |
 | SC-Embedding-4B | [Qwen3-4B-Instruct-2507](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507) | [🤗 504 MiB](https://huggingface.co/linlp22/SC-Embedding-4B) |
 
-请同时下载适配器和对应基座。已发布适配器使用固定初始教师训练，本仓库的训练方案采用在线自蒸馏；具体来源见模型卡和[模型元数据](checkpoints.json)。
+请同时下载适配器和对应基座。
+
+<details>
+<summary>权重来源</summary>
+
+已发布适配器使用固定初始教师训练，本仓库的训练方案采用在线自蒸馏；具体来源见模型卡和[模型元数据](checkpoints.json)。
+
+</details>
 
 ## 安装
 
@@ -92,7 +99,7 @@ cd SC-Embedding
 pip install -e .
 ```
 
-开发环境使用 Python 3.11、PyTorch 2.9.0、Transformers 5.8.1 和 PEFT 0.14.0。Ascend 还使用 torch-npu 2.9.0.post2 和 CANN 9.0.0。代码包含 CUDA 入口，但尚未完成完整 CUDA 训练验证。
+开发环境：Python 3.11、PyTorch 2.9.0、Transformers 5.8.1、PEFT 0.14.0；Ascend 还需 torch-npu 2.9.0.post2 和 CANN 9.0.0。代码包含 CUDA 入口，但尚未完成完整 CUDA 训练验证。
 
 <a id="inference"></a>
 
@@ -128,7 +135,7 @@ print(scores)
 
 Ascend 环境需导入 `torch` 和 `torch_npu`，调用 `torch.npu.set_device(0)`，并将设备改为 `device="npu:0"`。
 
-每个段落列表必须来自**同一篇文档或同一段对话，并按时间顺序排列**，历史检索只访问当前段落之前的内容。独立文本编码使用 `model.encode_passages(passages, contextual=False)`。默认历史预算为四个段落、2,048 tokens。
+每个段落列表必须来自**同一篇文档或同一段对话，并按时间顺序排列**，历史检索只访问当前段落之前的内容。独立文本编码使用 `model.encode_passages(passages, contextual=False)`。
 
 <a id="training"></a>
 
@@ -140,7 +147,7 @@ Ascend 环境需导入 `torch` 和 `torch_npu`，调用 `torch.npu.set_device(0)
 {"id":"example-1","passages":["Alice lives in Paris.","She works as a doctor.","Bob lives in London."],"query":"Where does Alice live?","positives":[0]}
 ```
 
-每条样本至少包含一个正例和一个负例。问题与相关性标签提供训练监督，历史检索只使用段落文本。
+每条样本至少包含一个正例和一个负例。
 
 **一条命令完成两个阶段，并保存最终适配器：**
 
@@ -151,9 +158,9 @@ DEVICE=npu NPROC=8 bash scripts/train.sh \
   --output runs/sc-4b
 ```
 
-Local 预训练和选择性上下文学习之间直接保留模型权重，只在 `runs/sc-4b/final/` 保存最终结果，无需中间 Local checkpoint。训练完成后，使用上面的推理代码加载该目录即可。
+最终适配器保存在 `runs/sc-4b/final/`，使用上面的推理代码即可加载。
 
-训练其他尺寸时提供对应基座；NVIDIA GPU 使用 `DEVICE=cuda`。`NPROC` 必须能整除有效 batch size 16。训练入口提供默认值，可通过 `--local-lr`、`--contextual-lr`、`--local-steps` 和 `--contextual-steps` 调整学习率与步数。实验设置详见论文。
+训练其他尺寸时提供对应基座；NVIDIA GPU 使用 `DEVICE=cuda`。`NPROC` 必须能整除有效 batch size 16。可选参数见 `python -m sc_embedding.train --help`。
 
 ## 致谢与许可证
 
