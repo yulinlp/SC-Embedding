@@ -114,6 +114,8 @@ experiment orchestration or promise identical published scores.
 
 ## Use the selected checkpoints
 
+Download adapters from [Hugging Face](https://huggingface.co/linlp22/SC-Embedding-4B); all three sizes are linked in the [model table](../README.md#models).
+
 The three companion model directories contain `adapter_model.safetensors`,
 `adapter_config.json`, `sc_config.json`, a model card, and provenance/checksums.
 They contain the selected existing weights, with tensor values preserved

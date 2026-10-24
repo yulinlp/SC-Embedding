@@ -37,11 +37,11 @@
 
 | 模型 | 基座 | 已选定适配器大小 |
 | :--- | :--- | :--- |
-| SC-Embedding-0.8B | [Qwen3.5-0.8B](https://huggingface.co/Qwen/Qwen3.5-0.8B) | 165 MiB |
-| SC-Embedding-2B | [Qwen3.5-2B](https://huggingface.co/Qwen/Qwen3.5-2B) | 257 MiB |
-| SC-Embedding-4B | [Qwen3-4B-Instruct-2507](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507) | 504 MiB |
+| [SC-Embedding-0.8B](https://huggingface.co/linlp22/SC-Embedding-0.8B) | [Qwen3.5-0.8B](https://huggingface.co/Qwen/Qwen3.5-0.8B) | 165 MiB |
+| [SC-Embedding-2B](https://huggingface.co/linlp22/SC-Embedding-2B) | [Qwen3.5-2B](https://huggingface.co/Qwen/Qwen3.5-2B) | 257 MiB |
+| [SC-Embedding-4B](https://huggingface.co/linlp22/SC-Embedding-4B) | [Qwen3-4B-Instruct-2507](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507) | 504 MiB |
 
-适配器已整理完成，**尚未提供托管下载链接**。[模型元数据](checkpoints.json)记录了基座模型与 SHA-256 校验值。基座权重需单独准备。
+点击上表中的模型名称即可下载选定的 LoRA 适配器。[模型元数据](checkpoints.json)记录了基座模型、Hub 版本和 SHA-256 校验值。基座权重需单独准备。
 
 <details>
 <summary><b>权重来源说明</b></summary>
@@ -68,7 +68,12 @@ python -m pip install -e '.[test]'
 
 ## 🚀 快速使用
 
-指定本地基座和适配器目录：
+下载适配器及其基座，然后从本地加载：
+
+```bash
+hf download linlp22/SC-Embedding-4B --local-dir checkpoints/SC-Embedding-4B
+hf download Qwen/Qwen3-4B-Instruct-2507 --local-dir models/Qwen3-4B-Instruct-2507
+```
 
 ```python
 import torch
@@ -77,8 +82,8 @@ from sc_embedding.model import SCEmbedding
 
 torch.npu.set_device(0)
 model = SCEmbedding.from_pretrained(
-    "/path/to/Qwen3-4B-Instruct-2507",
-    adapter="/path/to/SC-Embedding-4B",
+    "models/Qwen3-4B-Instruct-2507",
+    adapter="checkpoints/SC-Embedding-4B",
     device="npu:0",
 )
 

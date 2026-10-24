@@ -10,7 +10,10 @@
     "trainable_tensor_count": 372,
     "adapter_sha256": "96e16de11a23cfaed3a2787eed19f06d667caaef6dab8ba091f7fe6c20d11a60",
     "conversion": "PEFT key renaming only; every tensor verified bitwise equal",
-    "learning_rate": 5e-06
+    "learning_rate": 5e-06,
+    "huggingface_repo": "linlp22/SC-Embedding-0.8B",
+    "huggingface_url": "https://huggingface.co/linlp22/SC-Embedding-0.8B",
+    "huggingface_revision": "ebeb73416b3f6aaf1e5613edfed393393a5d2164"
   },
   {
     "model": "SC-Embedding-2B",
@@ -23,7 +26,10 @@
     "trainable_tensor_count": 372,
     "adapter_sha256": "8e114c14e1c991413a3739f8b8142411dc65171ab33773f85314ba2408c22f4f",
     "conversion": "PEFT key renaming only; every tensor verified bitwise equal",
-    "learning_rate": 2e-05
+    "learning_rate": 2e-05,
+    "huggingface_repo": "linlp22/SC-Embedding-2B",
+    "huggingface_url": "https://huggingface.co/linlp22/SC-Embedding-2B",
+    "huggingface_revision": "452f2faf99679865efa99921dbf7d7403fc78d68"
   },
   {
     "model": "SC-Embedding-4B",
@@ -36,6 +42,9 @@
     "trainable_tensor_count": 504,
     "adapter_sha256": "ad64cbe0fedaf2ece963a08a249e7be8b77e765570782c6af20df98ffc8232eb",
     "conversion": "PEFT key renaming only; every tensor verified bitwise equal",
-    "learning_rate": 1e-05
+    "learning_rate": 1e-05,
+    "huggingface_repo": "linlp22/SC-Embedding-4B",
+    "huggingface_url": "https://huggingface.co/linlp22/SC-Embedding-4B",
+    "huggingface_revision": "8931d7257c15957e25e03653e2622aa86d196758"
   }
 ]

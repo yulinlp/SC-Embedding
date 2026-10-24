@@ -48,13 +48,13 @@ standard similarity search and existing retrieval pipelines.
 
 | Model | Backbone | Selected adapter |
 | :--- | :--- | :--- |
-| SC-Embedding-0.8B | [Qwen3.5-0.8B](https://huggingface.co/Qwen/Qwen3.5-0.8B) | 165 MiB |
-| SC-Embedding-2B | [Qwen3.5-2B](https://huggingface.co/Qwen/Qwen3.5-2B) | 257 MiB |
-| SC-Embedding-4B | [Qwen3-4B-Instruct-2507](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507) | 504 MiB |
+| [SC-Embedding-0.8B](https://huggingface.co/linlp22/SC-Embedding-0.8B) | [Qwen3.5-0.8B](https://huggingface.co/Qwen/Qwen3.5-0.8B) | 165 MiB |
+| [SC-Embedding-2B](https://huggingface.co/linlp22/SC-Embedding-2B) | [Qwen3.5-2B](https://huggingface.co/Qwen/Qwen3.5-2B) | 257 MiB |
+| [SC-Embedding-4B](https://huggingface.co/linlp22/SC-Embedding-4B) | [Qwen3-4B-Instruct-2507](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507) | 504 MiB |
 
-Adapters are prepared; **hosted checkpoint downloads are not yet available**.
-[Checkpoint metadata](checkpoints.json) records their base models and SHA-256
-checksums. Base weights are supplied separately.
+Download the selected LoRA adapters from the model links above.
+[Checkpoint metadata](checkpoints.json) records their base models, Hub revisions,
+and SHA-256 checksums. Base weights are supplied separately.
 
 <details>
 <summary><b>Checkpoint provenance</b></summary>
@@ -87,7 +87,12 @@ setup is one server with eight Ascend 910B NPUs.
 
 ## 🚀 Quick Start
 
-Provide a local backbone and adapter directory:
+Download an adapter and its matching backbone, then load them locally:
+
+```bash
+hf download linlp22/SC-Embedding-4B --local-dir checkpoints/SC-Embedding-4B
+hf download Qwen/Qwen3-4B-Instruct-2507 --local-dir models/Qwen3-4B-Instruct-2507
+```
 
 ```python
 import torch
@@ -96,8 +101,8 @@ from sc_embedding.model import SCEmbedding
 
 torch.npu.set_device(0)
 model = SCEmbedding.from_pretrained(
-    "/path/to/Qwen3-4B-Instruct-2507",
-    adapter="/path/to/SC-Embedding-4B",
+    "models/Qwen3-4B-Instruct-2507",
+    adapter="checkpoints/SC-Embedding-4B",
     device="npu:0",
 )
 
