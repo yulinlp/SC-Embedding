@@ -1,0 +1,10 @@
+SC-Embedding
+
+This release extracts the selective contextual embedding method from the
+SelectiveMemoryEmbedding research codebase. The source code is distributed
+under the repository's Apache License 2.0.
+
+The training setup builds on EvoEmbedding and the EvoTrain-180K dataset
+(MiG-NJU/EvoTrain-180K). Backbone weights are provided separately by Qwen.
+Transformers, PEFT, PyTorch, and their dependencies retain their own licenses.
+The release does not redistribute third-party base-model weights or datasets.

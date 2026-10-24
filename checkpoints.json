@@ -1,0 +1,41 @@
+[
+  {
+    "model": "SC-Embedding-0.8B",
+    "base_model": "Qwen/Qwen3.5-0.8B",
+    "local_updates": 3000,
+    "contextual_updates": 100,
+    "source_checkpoint_sha256": "61ef887d626a68b60c0493c9d7c21841b8d0fa30bd99d9ce0c5b66fcc4703323",
+    "source_training_plan_sha256": "890e23ebca61978aaee348815839ac1edb22a557992c64858b22cc812b4ce5c4",
+    "source_teacher_policy": "frozen_exact_initial_document_adapter_clone",
+    "trainable_tensor_count": 372,
+    "adapter_sha256": "96e16de11a23cfaed3a2787eed19f06d667caaef6dab8ba091f7fe6c20d11a60",
+    "conversion": "PEFT key renaming only; every tensor verified bitwise equal",
+    "learning_rate": 5e-06
+  },
+  {
+    "model": "SC-Embedding-2B",
+    "base_model": "Qwen/Qwen3.5-2B",
+    "local_updates": 5300,
+    "contextual_updates": 600,
+    "source_checkpoint_sha256": "0e6994dbb84886b7c6a422412cd2fe2ff9d189cab302aa3b3610643260fb12ca",
+    "source_training_plan_sha256": "dbf0373a7f741c9efefadecf38f7a7f7e8d214d6afbcfce6cecd6c09962dddb3",
+    "source_teacher_policy": "frozen_exact_initial_document_adapter_clone",
+    "trainable_tensor_count": 372,
+    "adapter_sha256": "8e114c14e1c991413a3739f8b8142411dc65171ab33773f85314ba2408c22f4f",
+    "conversion": "PEFT key renaming only; every tensor verified bitwise equal",
+    "learning_rate": 2e-05
+  },
+  {
+    "model": "SC-Embedding-4B",
+    "base_model": "Qwen/Qwen3-4B-Instruct-2507",
+    "local_updates": 5300,
+    "contextual_updates": 600,
+    "source_checkpoint_sha256": "f11773751a55c8b5a2f788393c75b38c2f44adfcb706ab91d1afb219c51c416f",
+    "source_training_plan_sha256": "b49edbfed792540eb2a2ebe48e4feb94902e167c82f097b262295604cf2d5d55",
+    "source_teacher_policy": "frozen_exact_initial_document_adapter_clone",
+    "trainable_tensor_count": 504,
+    "adapter_sha256": "ad64cbe0fedaf2ece963a08a249e7be8b77e765570782c6af20df98ffc8232eb",
+    "conversion": "PEFT key renaming only; every tensor verified bitwise equal",
+    "learning_rate": 1e-05
+  }
+]
