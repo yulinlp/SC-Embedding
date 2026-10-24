@@ -3,6 +3,7 @@
 # SC-Embedding
 ### Selective Contextualization for Long-Context Retrieval
 
+![WWW 2027 · Under Review](https://img.shields.io/badge/WWW_2027-Under_Review-315EA8?style=flat-square)
 [![Models](https://img.shields.io/badge/🤗_Models-Hugging_Face-FFD21E)](#models)
 [![GitHub stars](https://img.shields.io/github/stars/yulinlp/SC-Embedding?style=social)](https://github.com/yulinlp/SC-Embedding)
 [![License](https://img.shields.io/badge/License-Apache_2.0-315EA8)](LICENSE)
